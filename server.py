@@ -10,6 +10,8 @@ class Server():
 		self.setupsock(_port)
 		self.list = Clients()
 		self.run = True
+		self.ThreadStack = []
+		self.ThreadId = 0
 
 	def setupsock(self, _port = 1717):
 		self.host = ''
@@ -26,29 +28,18 @@ class Server():
 				#print("ClientList:     ")
 				#print(self.list.ClientList)
 				conn.send(self.WelcomeMessage())
-				action = ActionHandler(conn, addr)
-				thread.start_new_thread(action.ActionHandlerLoop())
-				print("OK Multithread")
-
+				thread.start_new_thread(self.ActionHandlerLoop, (conn, addr))
 	def WelcomeMessage(self):
 		return '\033[91m' + '       Welcome to the official ChatRoulette Server' + '\n\n' + '\033[0m' + '     Use ' + '\033[1m' + 'help' + '\033[0m' + ' for further instructions' + '\n\n'
 
+	def ActionHandlerLoop(self, conn, addr):
+		while True:
+			command = conn.recv(25)
+			print(command)
 
 
 	def shutdown(self):
 		self.conn.close()
-
-class ActionHandler(Server):
-	def __init__(self, _conn, _addr):
-		self.connected = True
-		self.conn = _conn
-		self.addr = _addr
-
-	def ActionHandlerLoop(self):
-		while self.connected:
-			command = self.conn.recv(25)
-			print(command)
-
 
 
 
@@ -74,5 +65,5 @@ class Clients(Server):
 
 
 
-TestServer = Server(4815)
+TestServer = Server(4818)
 TestServer.ListenForPeers()
